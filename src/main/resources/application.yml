@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: chat-app-dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/chat_app
+    username: shashwat
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+server:
+  port: 3300

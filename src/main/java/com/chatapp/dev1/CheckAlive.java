@@ -1,0 +1,15 @@
+package com.chatapp.dev1;
+
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class CheckAlive {
+
+    @GetMapping("/check")
+    public String checkAlive() {
+        return "Alive";
+    }
+
+}
