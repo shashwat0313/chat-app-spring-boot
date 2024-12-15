@@ -27,7 +27,7 @@ public class ParticipantController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Participant>> getAllPraticipants(){
+    public ResponseEntity<List<Participant>> getAllParticipants(){
         return new ResponseEntity<>(participantService.getAllParticipants(), HttpStatus.OK);
     }
 

@@ -4,6 +4,32 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Build output ###
+/build/
+!**/src/main/**/build/
+/target/
+#!**/src/main/**/target/
+#!**/src/test/**/target/
+
+### Logs ###
+*.log
+logs/
+
+### Temporary files ###
+*.tmp
+
+### Maven ###
+target/generated-sources/
+
+### OS-Specific ###
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+### IDE-Specific Configurations ###
 ### STS ###
 .apt_generated
 .classpath
@@ -25,9 +51,55 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+### Spring Boot-Specific ###
+.restart/
+.devtools/
+.swagger-codegen/
+*.swagger-codegen/
+
+### Other Editor-Specific ###
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+
+# ORIGINAL GITIGNORE
+
+#HELP.md
+#target/
+#!.mvn/wrapper/maven-wrapper.jar
+#!**/src/main/**/target/
+#!**/src/test/**/target/
+#
+#### STS ###
+#.apt_generated
+#.classpath
+#.factorypath
+#.project
+#.settings
+#.springBeans
+#.sts4-cache
+#
+#### IntelliJ IDEA ###
+#.idea
+#*.iws
+#*.iml
+#*.ipr
+#
+#### NetBeans ###
+#/nbproject/private/
+#/nbbuild/
+#/dist/
+#/nbdist/
+#/.nb-gradle/
+#build/
+#!**/src/main/**/build/
+#!**/src/test/**/build/
+#
+#### VS Code ###
+#.vscode/

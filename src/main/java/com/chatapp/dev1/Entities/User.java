@@ -21,4 +21,16 @@
 
         @Column(name = "username", nullable = false, unique = true, length = 50) // Maps to the "username" column
         private String username;
+
+        @Column(name = "roles", nullable = false) // Roles as a comma-separated string
+        private String roles;
+
+        @Column(name = "encoded_password", nullable = false) // Encrypted password column
+        private String encodedPassword;
+
+        public User(String username, String user, String encode) {
+            this.username = username;
+            this.roles = user;
+            this.encodedPassword = encode;
+        }
     }
