@@ -60,6 +60,14 @@ public class ParticipantService {
         return participantRepository.existsByChatChatIdAndUserUserId(chat.getChatId(), user.getUserId());
     }
 
+    public void deleteParticipantByUserId(Long userId) {
+        participantRepository.deleteParticipantByUser_UserId(userId);
+    }
+
+    public List<Participant> getParticipantsByChatId(Long chatId) {
+        return participantRepository.getParticipantsByChat_ChatId(chatId);
+    }
+
 //    @Transactional
 //    public Participant getFullParticipantDetails(Long participantId) {
 //        Participant participant = participantRepository.findById(participantId)

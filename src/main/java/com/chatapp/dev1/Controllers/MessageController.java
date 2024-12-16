@@ -2,7 +2,7 @@ package com.chatapp.dev1.Controllers;
 
 import com.chatapp.dev1.Entities.APIResponse;
 import com.chatapp.dev1.Entities.Message;
-import com.chatapp.dev1.Entities.MessageDTO;
+import com.chatapp.dev1.Entities.DTOs.MessageDTO;
 import com.chatapp.dev1.Services.ChatService;
 import com.chatapp.dev1.Services.MessageService;
 import com.chatapp.dev1.Services.ParticipantService;
@@ -10,6 +10,8 @@ import com.chatapp.dev1.Services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +39,18 @@ public class MessageController {
 
     @PostMapping("/write")
     public ResponseEntity<?> writeMessage(@RequestBody MessageDTO messageDTO) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        org.springframework.security.core.userdetails.User securityUser =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+        String usernameFromSecurity = securityUser.getUsername();
+
+        if(!usernameFromSecurity.equals(messageDTO.senderUserId.toString())){
+            return new ResponseEntity<>(new APIResponse(false, "Unauthorised to send with given name", null), HttpStatus.BAD_REQUEST);
+        }
+
         if(isValidMessageDTO(messageDTO)){
             Message message = new  Message();
             message.setMessageText(messageDTO.getMessage());

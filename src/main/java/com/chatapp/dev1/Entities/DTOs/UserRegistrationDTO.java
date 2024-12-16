@@ -1,4 +1,4 @@
-package com.chatapp.dev1.Entities;
+package com.chatapp.dev1.Entities.DTOs;
 
 import lombok.Data;
 

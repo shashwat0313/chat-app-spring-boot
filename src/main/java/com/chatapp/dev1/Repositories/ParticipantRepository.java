@@ -13,4 +13,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     int countParticipantByChat(Chat chat);
 
     boolean existsByChatChatIdAndUserUserId(Long chatId, Long userId);
+
+    void deleteParticipantByUser_UserId(Long userId);
+
+    List<Participant> getParticipantsByChat_ChatId(Long chatChatId);
 }

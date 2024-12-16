@@ -4,7 +4,10 @@ import com.chatapp.dev1.Entities.User;
 import com.chatapp.dev1.Services.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,9 +37,19 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/username/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable String username){
-        User user = userService.getUserByUsername(username);
+    @GetMapping("/username")
+    public ResponseEntity<User> getUserByUsername(){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        org.springframework.security.core.userdetails.User securityUser =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+        String usernameFromSecurity = securityUser.getUsername();
+
+        log.info("usernameFromSecurity=" + usernameFromSecurity);
+
+        User user = userService.getUserByUsername(usernameFromSecurity);
 
         return ResponseEntity.ok(user);
     }

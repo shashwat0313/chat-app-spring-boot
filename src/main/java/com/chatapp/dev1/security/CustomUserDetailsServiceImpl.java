@@ -29,12 +29,12 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         log.info("username(in customuserde...impl)=" + username);
 
         com.chatapp.dev1.Entities.User user = userService.getUserByUsername(username);
+
         if (user == null) {
             throw new UsernameNotFoundException("User: " + username + " not found.");
         }
 
         log.info("user roles = " + user.getRoles());
-
 
         List<SimpleGrantedAuthority> authorities = Arrays.stream(user.getRoles().split(","))
                 .map(role ->

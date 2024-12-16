@@ -1,6 +1,7 @@
 package com.chatapp.dev1.Controllers;
 
 import com.chatapp.dev1.Entities.*;
+import com.chatapp.dev1.Entities.DTOs.ParticipantDTO;
 import com.chatapp.dev1.Services.ChatService;
 import com.chatapp.dev1.Services.ParticipantService;
 import com.chatapp.dev1.Services.UserService;
