@@ -32,13 +32,20 @@ public class OneToOneChatController {
     }
 
     @PostMapping("/new-chat")
-    public void createOneToOneChat(@RequestBody OneToOneChatDTO oneToOneChatDTO){
+    public ResponseEntity<?> createOneToOneChat(@RequestBody OneToOneChatDTO oneToOneChatDTO){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         org.springframework.security.core.userdetails.User securityUser =
                 (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
 
         String usernameFromSecurity = securityUser.getUsername();
+
+//        chat from the user to the same user MUST not be created
+        String friendUsername = oneToOneChatDTO.getFriendUsername();
+
+        if(friendUsername.equals(usernameFromSecurity)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
 
 //        we now need to create a new chat
 //        1. create a chat
@@ -85,6 +92,9 @@ public class OneToOneChatController {
             participantService.saveParticipant(participantSelf);
             participantService.saveParticipant(participantFriend);
 
+            OneToOneChatDTO oneToOneChatDTOResponse = new OneToOneChatDTO(savedChat.getChatId().toString(), savedChat.getChatName(), userFriend.getUsername());
+
+            return new ResponseEntity<>(oneToOneChatDTOResponse, HttpStatus.CREATED);
         } catch (Exception e) {
             log.info("exception in createoneToOneChat: " + e.getMessage());
             throw new RuntimeException(e);

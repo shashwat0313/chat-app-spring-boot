@@ -1,8 +1,12 @@
 package com.chatapp.dev1.Controllers;
 
 import com.chatapp.dev1.Entities.APIResponse;
+import com.chatapp.dev1.Entities.Chat;
+import com.chatapp.dev1.Entities.DTOs.MessageDTO_2;
+import com.chatapp.dev1.Entities.DTOs.MessageDTO_Receive;
 import com.chatapp.dev1.Entities.Message;
 import com.chatapp.dev1.Entities.DTOs.MessageDTO;
+import com.chatapp.dev1.Entities.User;
 import com.chatapp.dev1.Services.ChatService;
 import com.chatapp.dev1.Services.MessageService;
 import com.chatapp.dev1.Services.ParticipantService;
@@ -65,10 +69,45 @@ public class MessageController {
                 return new ResponseEntity<>(new APIResponse(false, "sender not member of chat or message invalid", null), HttpStatus.BAD_REQUEST);
             }
 
-            return new ResponseEntity<>(messageService.saveMessage(message), HttpStatus.CREATED);
+            Message savedMessage = messageService.saveMessage(message);
+
+            return new ResponseEntity<>(new MessageDTO_2(savedMessage.getSender().getUsername(), savedMessage.getMessageText(), savedMessage.getSentAt()), HttpStatus.CREATED);
         }
 
         return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping("/write2")
+    public ResponseEntity<?> writeMessage2(@RequestBody MessageDTO_Receive messageDTO_receive){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        org.springframework.security.core.userdetails.User securityUser =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+        String usernameFromSecurity = securityUser.getUsername();
+
+        Chat chat = chatService.getChatById(Long.parseLong(messageDTO_receive.getChatId()));
+        User authenticatedUser = userService.getUserByUsername(usernameFromSecurity);
+
+//       check if user has rights to this chat
+        if ( !chatService.existsByChatChatId ( Long.parseLong(messageDTO_receive.getChatId()) )
+                || !participantService.participantExistsByChatRefAndUserRef(chat, authenticatedUser) ){
+
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+
+        Message message = new Message();
+        message.setMessageText(messageDTO_receive.getText());
+        message.setChat(chat);
+        message.setSender(authenticatedUser);
+
+        Message savedMessage = messageService.saveMessage(message);
+
+        log.info("savedmessage text: " + savedMessage.getMessageText() + " sender: " + savedMessage.getSender().getUsername());
+
+        return new ResponseEntity<>(new MessageDTO_2(savedMessage.getSender().getUsername(), savedMessage.getMessageText(), savedMessage.getSentAt()), HttpStatus.CREATED);
     }
     
     @GetMapping("/get-messages/{chat_id}")
@@ -77,13 +116,45 @@ public class MessageController {
             return new ResponseEntity<>(new APIResponse(false, "no such chat exists", null), HttpStatus.BAD_REQUEST);
         }
 
+        Chat chat;
+        if (chatService.existsByChatChatId(chat_id)){
+            chat = chatService.getChatById(chat_id);
+        }
+        else{
+            return new ResponseEntity<>(new APIResponse(false, "no such chat exists", null), HttpStatus.BAD_REQUEST);
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        org.springframework.security.core.userdetails.User securityUser =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+        String usernameFromSecurity = securityUser.getUsername();
+
+        User authenticatedUser = userService.getUserByUsername(usernameFromSecurity);
+
+//       check if user has rights to this chat
+        if (!chatService.existsByChatChatId(chat_id)
+                || !participantService.participantExistsByChatRefAndUserRef(chat, authenticatedUser)){
+
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         List<Message> messages = messageService.getAllMessagesByChatId(chat_id);
 
-        if (messages != null) {
-            return new ResponseEntity<>(messages, HttpStatus.OK);
+        List<MessageDTO_2> messageDTO_2List = new java.util.ArrayList<>(List.of());
+
+        for(int i = 0; i < messages.size(); i++){
+            messageDTO_2List.add(new MessageDTO_2(messages.get(i).getSender().getUsername(), messages.get(i).getMessageText(), messages.get(i).getSentAt()));
         }
-        log.info("not found any messages");
-        return ResponseEntity.noContent().build();
+
+        return new ResponseEntity<>(messageDTO_2List, HttpStatus.OK);
+
+//        if (messages != null) {
+//            return new ResponseEntity<>(messages, HttpStatus.OK);
+//        }
+//        log.info("not found any messages");
+//        return ResponseEntity.noContent().build();
     }
     
     private boolean isValidMessage(Message message) {

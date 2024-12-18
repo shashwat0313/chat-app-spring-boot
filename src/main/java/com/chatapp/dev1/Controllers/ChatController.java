@@ -34,6 +34,7 @@ public class ChatController {
         this.participantService = participantService;
     }
 
+
     @GetMapping
     public ResponseEntity<List<Chat>> getAllChats(){
         return new ResponseEntity<>(chatService.getAllChats(), HttpStatus.OK);
@@ -51,7 +52,7 @@ public class ChatController {
 
         User authenticatedUser = userService.getUserByUsername(usernameFromSecurity);
 
-        log.info("got user in getallchats with user id: " + authenticatedUser.getUserId());
+//        log.info("got user in getallchats with user id: " + authenticatedUser.getUserId());
 
 //        protection
         if(!authenticatedUser.getUserId().equals(user_id)){
@@ -60,7 +61,7 @@ public class ChatController {
 
         List<Chat> userChatList = chatService.getAllChatsByUserId(authenticatedUser.getUserId());
 
-        log.info("chat count for the user is: " + userChatList.size());
+//        log.info("chat count for the user is: " + userChatList.size());
 
 //        we need to return an object like {chatName. FriendName}
         List<OneToOneChatDTO> chatListForResponse = new java.util.ArrayList<>(List.of());
@@ -70,14 +71,14 @@ public class ChatController {
             Stream<Participant> participantStream = participantsInChat.stream().filter(participant -> !participant.getUser().getUserId().equals(authenticatedUser.getUserId()));
             String friendName = participantStream.toList().getFirst().getUser().getUsername();
 
-            chatListForResponse.add(new OneToOneChatDTO(userChatList.get(i).getChatName(), friendName));
+            chatListForResponse.add(new OneToOneChatDTO(userChatList.get(i).getChatId().toString(), userChatList.get(i).getChatName(), friendName));
         }
 
         return new ResponseEntity<>(chatListForResponse, HttpStatus.OK);
     }
 
     @GetMapping("/id/{chatId}")
-    public ResponseEntity<Chat> getChatById(@PathVariable Long chatId) {
+    public ResponseEntity<?> getChatById(@PathVariable Long chatId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         org.springframework.security.core.userdetails.User securityUser =
@@ -93,16 +94,28 @@ public class ChatController {
         Chat chat = chatService.getChatById(chatId);
 
         User authenticatedUser = userService.getUserByUsername(usernameFromSecurity);
+        Long userId = authenticatedUser.getUserId();
+        @SuppressWarnings("WrapperTypeMayBePrimitive")
+        Long friendUserId = -1L;
 
-        List<Chat> userChatList = chatService.getAllChatsByUserId(authenticatedUser.getUserId());
+//      there must be two participants with the chat it gives
+        List<Participant> participantsInChat = participantService.getParticipantsByChatId(chatId);
 
-        Boolean isPresent = userChatList.stream()
-                .anyMatch(chatInList -> chatInList.getChatId().equals(chatId));
-        if(isPresent){
-            return new ResponseEntity<Chat>(chatService.getChatById(chatId), HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        for (Participant participant : participantsInChat) {
+            if (!participant.getUser().getUserId().equals(userId)) {
+                friendUserId = participant.getUser().getUserId();
+            }
         }
+
+        if (friendUserId != -1L){
+            String friendUsername = userService.getUserByUserId(friendUserId).getUsername();
+
+            return new ResponseEntity<>(new OneToOneChatDTO(chat.getChatId().toString(), chat.getChatName(), friendUsername), HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
 //    NOT TO BE CALLED BY ORDINARY USERS

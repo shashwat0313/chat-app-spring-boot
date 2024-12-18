@@ -26,7 +26,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        log.info("username(in customuserde...impl)=" + username);
+//        log.info("username(in customuserde...impl)=" + username);
 
         com.chatapp.dev1.Entities.User user = userService.getUserByUsername(username);
 
@@ -34,7 +34,7 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("User: " + username + " not found.");
         }
 
-        log.info("user roles = " + user.getRoles());
+//        log.info("user roles = " + user.getRoles());
 
         List<SimpleGrantedAuthority> authorities = Arrays.stream(user.getRoles().split(","))
                 .map(role ->
